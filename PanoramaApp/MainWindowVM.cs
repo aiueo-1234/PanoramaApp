@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
+using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using OpenCvSharp;
 
 namespace PanoramaApp;
@@ -13,62 +13,117 @@ namespace PanoramaApp;
 public partial class MainWindowVM : ObservableObject
 {
     [ObservableProperty]
-    private List<string> _files = new();
-    [ObservableProperty]
-    private bool _isPanorama = true;
+    private ObservableCollection<string> _files = new();
     [ObservableProperty]
     private int _selectMode = 0;
     [ObservableProperty]
-    private string _saveFileName = "pano";
-
+    private bool _isWindowEnabled = true;
 
     [RelayCommand]
     private void CreatePanorama()
     {
+        IsWindowEnabled = false;
+        IEnumerable<Mat> images = new List<Mat>();
         try
         {
-            var images = Files.Select(x => new Mat(x, ImreadModes.Unchanged));
-            var stitcher = Stitcher.Create(SelectMode == 0 ? Stitcher.Mode.Panorama : Stitcher.Mode.Scans);
+            images = Files.Select(x => Cv2.ImRead(x));
+            using var stitcher = Stitcher.Create(SelectMode == 0 ? Stitcher.Mode.Panorama : Stitcher.Mode.Scans);
             using var pano = new Mat();
-            stitcher.Stitch(images, pano);
-            foreach (var image in images)
+            var code = stitcher.Stitch(images, pano);
+            if (code == Stitcher.Status.OK)
             {
-                image.Dispose();
+                var dlg = new SaveFileDialog
+                {
+                    FileName = "Panorama",
+                    DefaultExt = ".png",
+                    Filter = "画像ファイル|*.bmp;*.dib;*.jepg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
+                    "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jepg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
+                    "TIFF|*.tiff;*.tif|ラディアンスHDR|*.hdr;*.pic"
+                };
+                var result = dlg.ShowDialog();
+                if (result == true)
+                {
+                    var isFileSaved = Cv2.ImWrite(dlg.FileName, pano);
+                    if (isFileSaved)
+                    {
+                        MessageBox.Show("合成できました", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        var processStartInfo = new ProcessStartInfo()
+                        {
+                            FileName = dlg.FileName,
+                            UseShellExecute = true
+                        };
+                        Process.Start(processStartInfo);
+                    }
+                    else
+                    {
+                        MessageBox.Show("画像を保存できませんでした", "失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
-            Cv2.ImWrite(Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(SaveFileName) + ".png"), pano);
-            MessageBox.Show("成功", "合成できました", MessageBoxButton.OK, MessageBoxImage.Information);
-            var processStartInfo = new ProcessStartInfo()
+            else if (code == Stitcher.Status.ErrorNeedMoreImgs)
             {
-                FileName = Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(SaveFileName) + ".png"),
-                UseShellExecute = true
-            };
-            Process.Start(processStartInfo);
+                MessageBox.Show("画像が足りませんでした", "失敗", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else if (code == Stitcher.Status.ErrorHomographyEstFail)
+            {
+                MessageBox.Show("ホモグラフィーの推定に失敗しました\n特徴点を多く含む画像を選択してください", "失敗", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else if (code == Stitcher.Status.ErrorCameraParamsAdjustFail)
+            {
+                MessageBox.Show("合成できませんでした", "失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        catch (OpenCvSharpException ex)
+        {
+            if (ex.Message == "imread failed.")
+            {
+                MessageBox.Show("画像を読み込めませんでした。", "失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#if DEBUG
+            throw;
+#else
+            MessageBox.Show("合成できませんでした", "失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+#endif  
         }
         catch
         {
-            MessageBox.Show("失敗", "合成できませんでした", MessageBoxButton.OK, MessageBoxImage.Error);
+#if DEBUG
+            throw;
+#else
+            MessageBox.Show("合成できませんでした", "失敗", MessageBoxButton.OK, MessageBoxImage.Error);
+#endif  
+        }
+        finally
+        {
+            foreach (var image in images)
+            {
+                image?.Dispose();
+            }
+            IsWindowEnabled = true;
         }
     }
 
     [RelayCommand]
     private void SelectFiles()
     {
-        // Configure open file dialog box
-        var dialog = new Microsoft.Win32.OpenFileDialog
+        var dialog = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = "画像ファイル|*.jepg;*.jpg;*.jpe;*.png;*.bmp;*.pbm,;*.pgm;*.ppm;*.sr;*.ras;*.jp2;*.tiff;*.tif|" +
-            "Windowsビットマップ|*.bmp|ポータブル画像形式|*.pbm;*.pgm;*.ppm|Sunラスター|*.sr,*.ras|" +
-            "JPEG|*.jepg;*.jpg;*.jpe|JPEG 2000|*.jp2|TIFF|*.tiff;*.tif|PNG|*.png"
+            Filter = "画像ファイル|*.bmp;*.dib;*.jepg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
+            "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jepg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
+            "TIFF|*.tiff;*.tif|ラディアンスHDR|*.hdr;*.pic"
         };
-
-        // Show open file dialog box
         var result = dialog.ShowDialog();
-
-        // Process open file dialog box results
         if (result == true)
         {
-            Files = Files.Concat(dialog.FileNames).ToList();
+            Files = new(Files.Concat(dialog.FileNames).Distinct());
         }
+    }
+
+    [RelayCommand]
+    private void RemoveFile(string? fileName)
+    {
+        if (string.IsNullOrEmpty(fileName)) return;
+        Files.Remove(fileName);
     }
 }

@@ -5,39 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PanoramaApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        Title="パノラマ合成" Height="450" Width="800" IsEnabled="{Binding IsWindowEnabled}">
     <Window.DataContext>
         <local:MainWindowVM/>
     </Window.DataContext>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0">
-                <TextBlock>合成するファイルを選択</TextBlock>
-                <Button Command="{Binding SelectFilesCommand}">SelectFiles</Button>
-            </StackPanel>
-            <ListBox Grid.Row="1" ItemsSource="{Binding Files}"/>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" TextAlignment="Center" VerticalAlignment="Center" Margin="0,0,10,0">合成するファイルを選択</TextBlock>
+                <Button Grid.Column="1" Command="{Binding SelectFilesCommand}" HorizontalAlignment="Left" VerticalAlignment="Center">SelectFiles</Button>
+            </Grid>
+            <ListBox Grid.Row="1" ItemsSource="{Binding Files}" d:ItemsSource="{d:SampleData}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding }" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Style="{StaticResource MaterialDesignFlatSecondaryMidBgButton}" Height="25" Width="39"
+                                    Content="×" Command="{Binding Path=DataContext.RemoveFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"  CommandParameter="{Binding }" Cursor=""/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
-        <Button Grid.Row="1" Grid.Column="0" Command="{Binding CreatePanoramaCommand}">Create</Button>
-        <StackPanel Grid.Row="1" Grid.Column="1">
-            <TextBlock>合成モード</TextBlock>
-            <ComboBox SelectedIndex="{Binding SelectMode}">
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" Margin="0,0,10,0" VerticalAlignment="Center">合成モード</TextBlock>
+            <ComboBox Grid.Column="1" Grid.Row="0" SelectedIndex="{Binding SelectMode}" HorizontalAlignment="Left">
                 <ComboBoxItem>パノラマ</ComboBoxItem>
                 <ComboBoxItem>スキャン</ComboBoxItem>
             </ComboBox>
-            <TextBlock>保存するファイル名</TextBlock>
-            <TextBox Text="{Binding SaveFileName}"/>
-        </StackPanel>
+        </Grid>
+        <Button Grid.Row="2" Command="{Binding CreatePanoramaCommand}">Create</Button>
     </Grid>
 </Window>
