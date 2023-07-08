@@ -17,12 +17,12 @@ public partial class MainWindowVM : ObservableObject
     [ObservableProperty]
     private int _selectMode = 0;
     [ObservableProperty]
-    private bool _isWindowEnabled = true;
+    private Visibility _isOverRapperEnabled = Visibility.Hidden;
 
     [RelayCommand]
     private void CreatePanorama()
     {
-        IsWindowEnabled = false;
+        IsOverRapperEnabled = Visibility.Visible;
         IEnumerable<Mat> images = new List<Mat>();
         try
         {
@@ -99,7 +99,7 @@ public partial class MainWindowVM : ObservableObject
             {
                 image?.Dispose();
             }
-            IsWindowEnabled = true;
+            IsOverRapperEnabled = Visibility.Hidden;
         }
     }
 
