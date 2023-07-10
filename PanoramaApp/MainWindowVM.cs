@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,7 +18,7 @@ public partial class MainWindowVM : ObservableObject
     private Visibility _isOverRapperEnabled = Visibility.Hidden;
 
     [RelayCommand]
-    private void CreatePanorama()
+    private async void CreatePanorama()
     {
         IsOverRapperEnabled = Visibility.Visible;
         IEnumerable<Mat> images = new List<Mat>();
@@ -29,7 +27,7 @@ public partial class MainWindowVM : ObservableObject
             images = Files.Select(x => Cv2.ImRead(x));
             using var stitcher = Stitcher.Create(SelectMode == 0 ? Stitcher.Mode.Panorama : Stitcher.Mode.Scans);
             using var pano = new Mat();
-            var code = stitcher.Stitch(images, pano);
+            var code = await Task.Run(()=>stitcher.Stitch(images, pano));
             if (code == Stitcher.Status.OK)
             {
                 var dlg = new SaveFileDialog

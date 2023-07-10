@@ -55,8 +55,8 @@
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding }" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                 <Button Grid.Column="1" Style="{StaticResource MaterialDesignFlatSecondaryMidBgButton}" Height="25" Width="39"
