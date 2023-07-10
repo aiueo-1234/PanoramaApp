@@ -28,12 +28,18 @@ jobs:
           shell: pwsh
         - name: Create Release
           id: create_release
-          uses: actions/create-release@v1.0.0
+          uses: actions/create-release@v1.1.4
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             tag_name: ${{ github.ref }}
             release_name: Release ${{ github.ref }}
+            body: |
+              # 使い方
+              1. App.zipをダウンロードして展開
+              2. PanoramaApp.exeを実行
+              
+              Windows Diffenderが警告を出しますが気にしないでください。
             draft: true
             prerelease: false
         - name: Upload Release Asset
