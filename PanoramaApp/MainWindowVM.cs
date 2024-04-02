@@ -18,7 +18,7 @@ public partial class MainWindowVM : ObservableObject
     private Visibility _isOverRapperEnabled = Visibility.Hidden;
 
     [RelayCommand]
-    private async void CreatePanorama()
+    private async Task CreatePanorama()
     {
         IsOverRapperEnabled = Visibility.Visible;
         IEnumerable<Mat> images = new List<Mat>();

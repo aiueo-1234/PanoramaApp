@@ -58,9 +58,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding }" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="0" Text="{Binding }" Margin="0,0,10,0" VerticalAlignment="Center" ToolTip="{Binding }"/>
                                 <Button Grid.Column="1" Style="{StaticResource MaterialDesignFlatSecondaryMidBgButton}" Height="25" Width="39"
-                                    Content="×" Command="{Binding Path=DataContext.RemoveFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"  CommandParameter="{Binding }" Cursor=""/>
+                                    Content="×" Command="{Binding Path=DataContext.RemoveFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                        CommandParameter="{Binding }" ToolTip="削除"/>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
