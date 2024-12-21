@@ -11,17 +11,19 @@ namespace PanoramaApp;
 public partial class MainWindowVM : ObservableObject
 {
     [ObservableProperty]
-    private ObservableCollection<string> _files = new();
+    public partial ObservableCollection<string> Files { get; set; } = [];
+
     [ObservableProperty]
-    private int _selectMode = 0;
+    public partial int SelectMode { get; set; } = 0;
+
     [ObservableProperty]
-    private Visibility _isOverRapperEnabled = Visibility.Hidden;
+    public partial Visibility IsOverRapperEnabled { get; set; } = Visibility.Hidden;
 
     [RelayCommand]
     private async Task CreatePanorama()
     {
         IsOverRapperEnabled = Visibility.Visible;
-        IEnumerable<Mat> images = new List<Mat>();
+        IEnumerable<Mat> images = [];
         try
         {
             images = Files.Select(x => Cv2.ImRead(x));
@@ -34,8 +36,8 @@ public partial class MainWindowVM : ObservableObject
                 {
                     FileName = "Panorama",
                     DefaultExt = ".png",
-                    Filter = "画像ファイル|*.bmp;*.dib;*.jepg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
-                    "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jepg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
+                    Filter = "画像ファイル|*.bmp;*.dib;*.jpeg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
+                    "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jpeg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
                     "TIFF|*.tiff;*.tif|ラディアンスHDR|*.hdr;*.pic"
                 };
                 var result = dlg.ShowDialog();
@@ -107,8 +109,8 @@ public partial class MainWindowVM : ObservableObject
         var dialog = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = "画像ファイル|*.bmp;*.dib;*.jepg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
-            "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jepg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
+            Filter = "画像ファイル|*.bmp;*.dib;*.jpeg;*.jpg;*.jpe;*.png;*.sr;*.ras;*.pbm;*.pgm;*.ppm;*.pxm;*.pnm;*.tiff;*.tif;*.hdr;*.pic|" +
+            "Windowsビットマップ|*.bmp;*.dib|JPEG|*.jpeg;*.jpg;*.jpe|PNG|*.png|Sun rasters|*.sr;*.ras|ポータブル画像形式|*.pbm;*.pgm;*.ppm;*.pxm;*.pnm|" +
             "TIFF|*.tiff;*.tif|ラディアンスHDR|*.hdr;*.pic"
         };
         var result = dialog.ShowDialog();
