@@ -13,14 +13,14 @@ jobs:
 
         runs-on: windows-latest
         env:
-            output: PanoramaApp/bin/Release/net8.0-windows/win-x64/publish/
+            output: PanoramaApp/bin/Release/net9.0-windows/win-x64/publish/
 
         steps:
         - uses: actions/checkout@v4
         - name: Setup .NET
-          uses: actions/setup-dotnet@v3
+          uses: actions/setup-dotnet@v4
           with:
-            dotnet-version: 8.0.x
+            dotnet-version: 9.0.x
         - name: Publish
           run: dotnet publish -c Release --self-contained true -p:PublishSingleFile=true
         - name: Create Zip
