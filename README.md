@@ -8,6 +8,8 @@ OpenCVを用いてパノラマ画像を作るアプリ
 # 履歴
 以下リリース履歴  
 ## version 2
+### version 2.1.1.0
+- tfmをnet10.0-windowsに修正
 ### version 2.1.0.0
 - .net 9 から .net 10 にアップデート
 ### version 2.0.0.0
